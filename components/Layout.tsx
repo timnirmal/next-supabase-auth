@@ -2,7 +2,7 @@ import { Fragment, FunctionComponent } from 'react'
 import classNames from 'classnames'
 import Header from './Header'
 import Footer from './Footer'
-import { MessageList, useMessage } from '~/lib/message'
+import { MessageList, useMessage } from '../lib/message'
 
 type LayoutProps = {
   usePadding?: boolean
