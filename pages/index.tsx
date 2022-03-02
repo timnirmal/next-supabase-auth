@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import { useState, useEffect } from 'react'
 import {NextPage} from 'next'
 import {NextAppPageProps} from '../types/app'
 import Layout from '../components/Layout'
@@ -20,7 +20,7 @@ const FORM_VALUES: SignUpFieldProps = {
 
 const IndexPage: NextPage<NextAppPageProps> = ({}) => {
     const [isSignIn, setIsSignIn] = useState(true)
-    const {loading, signIn, signUp} = useAuth()
+    const { loading, signIn, signUp, user, loggedIn } = useAuth()
     // Now since we have our form ready, what we're going to need for signing up our users
     // 1. let users provide email and password
     const [values, handleChange] = useFormFields<SignUpFieldProps>(FORM_VALUES)
