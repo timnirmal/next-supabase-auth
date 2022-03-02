@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {GetServerSideProps, NextPage} from 'next'
 import {FaDochub, FaBook} from 'react-icons/fa'
 import styles from '../styles/Home.module.css'
@@ -7,12 +8,17 @@ import Layout from '../components/Layout'
 import {FaLock} from 'react-icons/fa'
 import {useMessage} from '../lib/message'
 import {useFormFields} from '../lib/utils'
+import Spinner from '../components/Spinner'
+import {supabase} from "../lib/supabase";
 
 // define the shape of the SignUp form's fields
 type SignUpFieldProps = {
     email: string,
     password: string
 }
+
+//type SupabaseSignupPayload = SignUpFieldProps // type alias for Supabase payload
+type SupabaseAuthPayload = SignUpFieldProps // type alias for Supabase payload
 
 // the value we'd like to initialize the SignUp form with
 const FORM_VALUES: SignUpFieldProps = {
@@ -21,8 +27,63 @@ const FORM_VALUES: SignUpFieldProps = {
 }
 
 const IndexPage: NextPage<NextAppPageProps> = ({}) => {
+    const [loading, setLoading] = useState(false)
+    const [isSignIn, setIsSignIn] = useState(true)
     const {handleMessage} = useMessage()
+    // Now since we have our form ready, what we're going to need for signing up our users
+    // 1. let users provide email and password
     const [values, handleChange] = useFormFields<SignUpFieldProps>(FORM_VALUES)
+
+    // 2. send the provided details to Supabase
+    const signUp = async (payload: SupabaseAuthPayload) => {
+        try {
+            setLoading(true)
+            const {error} = await supabase.auth.signUp(payload)
+            if (error) {
+                if (handleMessage) {
+                    handleMessage({message: error.message, type: 'error'})
+                }
+            } else {
+                if (handleMessage) {
+                    handleMessage({
+                        message: 'Signup successful. Please check your inbox for a confirmation email!',
+                        type: 'success'
+                    })
+                }
+            }
+        } catch (error) {
+            if (handleMessage) {
+                handleMessage({message: error.error_description || error, type: 'error'})
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const signIn = async (payload: SupabaseAuthPayload) => {
+        try {
+            const { error } = await supabase.auth.signIn(payload)
+            if (error) {
+                if (handleMessage) {
+                    handleMessage({message: error.message, type: 'error'})
+                }
+            } else {
+                if (handleMessage) {
+                    handleMessage({message: 'Log in successful. I\'ll redirect you once I\'m done', type: 'success'})
+                }
+            }
+        } catch (error) {
+            if (handleMessage) {
+                handleMessage({message: error.error_description || error, type: 'error'})
+            }
+        }
+    }
+
+    const handleSumbit = (event: React.FormEvent) => {
+        event.preventDefault()
+        isSignIn ? signIn(values) : signUp(values)
+        //signUp(values)
+    }
 
     return (
         <Layout useBackdrop={true} usePadding={false}>
@@ -32,11 +93,11 @@ const IndexPage: NextPage<NextAppPageProps> = ({}) => {
                 <div className="w-full text-center mb-4 flex  flex-col place-items-center">
                     <div><FaLock className="text-gray-600 text-5xl shadow-sm"/></div>
                     <h3 className="text-3xl text-gray-600">Supa<strong>Auth</strong></h3>
-                    <small>Please provide your <strong>email</strong> and <strong>password</strong> and sign up</small>
+                    <small>Please provide your <strong>email</strong> and <strong>password</strong> and {isSignIn ? 'Log In' : 'Sign Up' }</small>
                 </div>
 
                 {/* Sign Up form  */}
-                <form className="w-full sm:w-1/2 xl:w-1/3">
+                <form className="w-full sm:w-1/2 xl:w-1/3" onSubmit={handleSumbit}>
                     <div className="border-teal p-8 border-t-12 bg-white mb-6 rounded-lg shadow-lg">
                         <div className="mb-4">
                             <label htmlFor="email" className="block font-semibold text-gray-800 mb-2">Email</label>
@@ -66,18 +127,22 @@ const IndexPage: NextPage<NextAppPageProps> = ({}) => {
                             />
                         </div>
 
-                        {/*  Sign Up form: Actions */}
+                        {/* <!-- Sign Up & Sign In form: Actions --> */}
 
                         <div className="flex pt-4 gap-2">
-                            <button type="submit"
-                                    className="flex-1 bg-gray-500 border border-gray-600 text-white py-3 rounded w-full text-center shadow"
-                                    onClick={(evt) => {
-                                        evt.preventDefault()
-                                        handleMessage({message: `will sign up with ${values.email}`})
-                                    }}
+                            <button type="submit" className="flex-1 bg-gray-500 border border-gray-600 text-white py-3 rounded w-full text-center shadow"
                             >
-                                Sign Up
+                                {isSignIn ? 'Log In' : 'Sign Up'}
                             </button>
+                            <div className="flex-1 text-right">
+                                <small className="block text-gray-600">{isSignIn ? 'Not a member yet?' : 'Already a member?'} </small>
+                                <a className="block font-semibold" href=""
+                                   onClick={(e) => {
+                                       e.preventDefault()
+                                       setIsSignIn(!isSignIn)
+                                   }}
+                                >{isSignIn ?  'Sign Up' : 'Log In' }</a>
+                            </div>
                         </div>
                     </div>
                 </form>
