@@ -2,15 +2,26 @@ import Link from 'next/link'
 import { useAuth } from '../lib/auth'
 import Layout from '../components/Layout'
 import { SpinnerFullPage } from '../components/Spinner'
+import { useEffect } from 'react'
+import Router from 'next/router'
+import { ROUTE_AUTH } from '../config'
 
 const ProfilePage = ({}) => {
     const {
         user,       // Logged in user object
         loading,    // Loading state
-        signOut     // Sign out method
+        signOut,    // Sign out method
+        loggedIn,
+        userLoading
     } = useAuth()
 
-    if(loading) {
+    useEffect(() => {
+        if (!userLoading && !loggedIn) {
+            Router.push(ROUTE_AUTH)
+        }
+    }, [userLoading, loggedIn]);
+
+    if(userLoading) {
         return <SpinnerFullPage/>
     }
 
