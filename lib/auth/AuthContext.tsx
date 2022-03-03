@@ -68,7 +68,9 @@ export const AuthProvider: FunctionComponent = ({
 
     const signInWithGithub = async (evt) => {
         evt.preventDefault()
-        await supabase.auth.signIn({ provider: 'github'})
+        await supabase.auth.signIn({ provider: 'github'}
+            /*, { redirectTo: 'http://localhost:3000/test' }*/
+        )
     }
 
     const signOut = async () => await supabase.auth.signOut()
