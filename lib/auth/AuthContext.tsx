@@ -10,6 +10,7 @@ import { ROUTE_HOME, ROUTE_AUTH } from '../../config'
 export type AuthContextProps = {
     signUp: (payload: SupabaseAuthPayload) => void,
     signIn: (payload: SupabaseAuthPayload) => void,
+    signInWithGithub: () => void,
     loading: boolean
     user: User,
     signOut: () => void,
@@ -65,6 +66,11 @@ export const AuthProvider: FunctionComponent = ({
         }
     }
 
+    const signInWithGithub = async (evt) => {
+        evt.preventDefault()
+        await supabase.auth.signIn({ provider: 'github'})
+    }
+
     const signOut = async () => await supabase.auth.signOut()
 
     const setServerSession = async (event: AuthChangeEvent, session: Session) => {
@@ -113,6 +119,7 @@ export const AuthProvider: FunctionComponent = ({
             user,
             signUp,
             signIn,
+            signInWithGithub,
             signOut,
             loggedIn,
             loading,

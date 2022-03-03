@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import {NextPage} from 'next'
 import {NextAppPageProps} from '../types/app'
 import Layout from '../components/Layout'
-import {FaLock} from 'react-icons/fa'
+import {FaLock, FaGithub} from 'react-icons/fa'
 import {useAuth} from '../lib/auth'
 import {useFormFields} from '../lib/utils'
 
@@ -20,7 +20,7 @@ const FORM_VALUES: SignUpFieldProps = {
 
 const IndexPage: NextPage<NextAppPageProps> = ({}) => {
     const [isSignIn, setIsSignIn] = useState(true)
-    const { loading, signIn, signUp, user, loggedIn } = useAuth()
+    const { loading, signIn, signUp, user, signInWithGithub } = useAuth()
     // Now since we have our form ready, what we're going to need for signing up our users
     // 1. let users provide email and password
     const [values, handleChange] = useFormFields<SignUpFieldProps>(FORM_VALUES)
@@ -47,6 +47,11 @@ const IndexPage: NextPage<NextAppPageProps> = ({}) => {
                 {/* Sign Up form  */}
                 <form className="w-full sm:w-1/2 xl:w-1/3" onSubmit={handleSubmit}>
                     <div className="border-teal p-8 border-t-12 bg-white mb-6 rounded-lg shadow-lg">
+                        <button onClick={signInWithGithub} className="flex-1 bg-gray-200 text-green-700 py-3 rounded w-full text-center shadow"
+                        >
+                            <FaGithub className="inline-block text-2xl"/> {isSignIn ? 'Log In' : 'Sign Up' } with <strong>Github</strong>
+                        </button>
+                        <hr className="my-4"/>
                         <div className="mb-4">
                             <label htmlFor="email" className="block font-semibold text-gray-800 mb-2">Email</label>
                             <input
